@@ -1,0 +1,18 @@
+#!/bin/bash
+
+BRANCH=`git branch | grep '*' | cut -d ' ' -f 2`
+
+BRANCH_POINT="$1"  # TODO can this be automated? Seems like not.
+if [ -z "$BRANCH_POINT" ]; then
+	# echo Usage: `basename $0` branch-root
+	# exit 1
+    BRANCH_POINT=origin/master
+elif [ "$BRANCH_POINT" == "--" ]; then
+    BRANCH_POINT=origin/master
+    shift
+else
+    shift
+fi
+
+
+git diff $@ $(git merge-base "$BRANCH_POINT" "$BRANCH")

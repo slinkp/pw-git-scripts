@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Git does not have an equivalent of svn cat. Humph.
+
+FULL_PATH=`git ls-files --full-name $1`
+if [ $# -gt 1 ]; then
+    REV=$2
+else
+    REV="HEAD"
+fi
+
+git show $REV:$FULL_PATH

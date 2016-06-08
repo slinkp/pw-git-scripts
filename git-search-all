@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Searches Git history for strings.
+git rev-list --all | xargs git grep $@

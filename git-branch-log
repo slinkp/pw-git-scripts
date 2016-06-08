@@ -1,0 +1,15 @@
+#!/bin/bash
+
+BRANCH=`git branch | grep '*' | cut -d ' ' -f 2`
+
+# TODO make OTHER an explicit option; as is, must pass it if you want
+# to pass any other args.
+OTHER="$1"
+
+if [ -z "$OTHER" ]; then
+    OTHER=origin/master
+else
+    shift
+fi
+
+git log $@ "$BRANCH" ^"$OTHER"
