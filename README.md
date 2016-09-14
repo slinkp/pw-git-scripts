@@ -15,7 +15,7 @@ Most recent branches last.  Very helpful when there are lots of branches
 and you remember you started working on it a month ago but forget what
 you named the branch.
 
-Example:
+Example (in reality it has pretty colors):
 
 ```
 $ git branch-activity | tail -4
@@ -25,6 +25,16 @@ $ git branch-activity | tail -4
 2016-06-07 23:38:41 -0400 10 hours ago	master
 ```
 
+```
+$ git-branch-activity -r --list '*fix*'
+2016-08-27 10:07:59 -0400 3 weeks ago	origin/fix_filters_popover
+2016-09-03 00:25:05 -0400 12 days ago	origin/p1_fix_fraggle_latency
+2016-09-06 19:20:33 -0400 8 days ago	origin/fix_android_conforbelation
+2016-09-08 15:37:28 -0400 6 days ago	origin/ugh_another_bugfix
+2016-09-13 18:02:21 -0400 19 hours ago	origin/fix_farshimelt_service
+2016-09-14 13:10:10 -0400 21 minutes ago	origin/fix_andrews_mess
+
+```
 
 ## git branch-diff
 
@@ -82,17 +92,17 @@ $ git cat README.md HEAD~4  | wc -l
 ## git make-branch
 
 Automates my typical preferences for starting a new branch: branches
-origin/master by default, without tracking, and creates a tag of the start
-point.
+origin/master by default; does not track origin/master;
+and creates a tag of the start point.
 
-Usage: `git make-branch branch-name [start_point] [tag_name]`
+Usage: `git make-branch branch-name [start_point [tag_name]]`
 
 [start_point] is NOT tracked.
 This is to avoid accidental pushes to the wrong remote branch.
 Typically, `git push origin branch-name` is all you need.
 
-If *start_point* is not given, origin/master is used.
-If *tag_name* is not given, *<branch-name>_start_point_<date>*
+If *start_point* is not given, `origin/master` is used.
+If *tag_name* is not given, `<branch-name>_start_point_<date>`
 is used.
 
 ## git search-all
