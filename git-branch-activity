@@ -1,5 +1,5 @@
 #!/bin/bash
 
-for k in `git branch | sed s/^..//`; do
+for k in `git branch $@ | sed s/^..// | grep -v -- '->'`; do
     echo -e `git log -1 --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k --`\\t"$k";
 done | sort
