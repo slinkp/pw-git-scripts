@@ -8,7 +8,7 @@ safe() { "$@" || barf "cannot $*"; }
 SCRIPT_NAME="`basename $0`"
 
 function usage {
-	warn "Usage: git make-branch branch-name [start_point] [tag_name]"
+	warn "Usage: git make-branch branch-name [start_point [tag_name]]"
     warn
     warn "[start_point] is NOT tracked."
     warn "This is to avoid accidental pushes to the wrong remote branch."
