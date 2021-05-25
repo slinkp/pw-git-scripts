@@ -1,15 +1,24 @@
 #!/bin/bash
 
-BRANCH=`git branch | grep '*' | cut -d ' ' -f 2`
+# TODO detect args that look like options and pass to git;
+# don't require -- for disambiguation
 
-# TODO make OTHER an explicit option; as is, must pass it if you want
-# to pass any other args.
 OTHER="$1"
 
 if [ -z "$OTHER" ]; then
     OTHER=origin/master
+elif [ "$OTHER" = "--" ]; then
+    OTHER=origin/master
+    shift
 else
     shift
 fi
 
-git log $@ "$BRANCH" ^"$OTHER"
+
+echo Comparing to branch "$OTHER"...
+git log $@ "$OTHER"...
+
+# More verbose way to do it:
+#BRANCH=`git branch | grep '*' | cut -d ' ' -f 2`
+#git log $@ "$BRANCH" ^"$OTHER"
+

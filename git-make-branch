@@ -8,16 +8,39 @@ safe() { "$@" || barf "cannot $*"; }
 SCRIPT_NAME="`basename $0`"
 
 function usage {
-	warn "Usage: git make-branch branch-name [start_point [tag_name]]"
+    warn "Usage: git make-branch [start_point] branch-name [tag_name]"
     warn
     warn "[start_point] is NOT tracked."
     warn "This is to avoid accidental pushes to the wrong remote branch."
     warn "Typically, 'git push origin branch-name' is all you need."
     warn
-	warn "If [start_point] is not given, origin/master is used."
-	warn "If [tag_name] is not given, <branch-name>_start_point_<date>"
-	warn "is used." 
+    warn "If [start_point] is not given, origin/master is used."
+    warn "If [tag_name] is not given, <branch-name>_start_point_<date>"
+    warn "is used." 
 }
+
+
+for arg in "$@"; do
+    if [ "$arg" == "-h" -o "$arg" == "--help" ]; then
+        usage
+        exit 0
+    fi
+done
+
+if [ $# -eq 0 ]; then
+    shout "Not enough arguments."
+    usage
+    exit 1
+fi
+
+START_POINT="origin/master"
+
+if [ "$#" -gt 1 ]; then
+	START_POINT="$1"
+    shift
+fi
+
+safe git log -1 "$START_POINT" > /dev/null
 
 BRANCH_NAME="$1"
 shift
@@ -27,15 +50,8 @@ if [ -z "$BRANCH_NAME" ]; then
 	exit 1
 fi
 
-START_POINT="origin/master"
 DATE=`date +"%Y%m%d"`
 TAG_NAME="${BRANCH_NAME}_start_point_${DATE}"
-
-if [ "$#" -gt 0 ]; then
-	START_POINT="$1"
-    shift
-    safe git log "$START_POINT" > /dev/null
-fi
 
 if [ "$#" -gt 0 ]; then
 	TAG_NAME="$1"
@@ -49,5 +65,5 @@ if [ "$#" -gt 0 ]; then
 fi
 
 safe git tag "$TAG_NAME" "$START_POINT"
-echo "Tagged $TAG_NAME"
+echo "Tagged $TAG_NAME starting from $START_POINT"
 safe git checkout --no-track "$TAG_NAME" -b "$BRANCH_NAME"
