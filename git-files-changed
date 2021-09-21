@@ -1,0 +1,5 @@
+#!/bin/bash
+
+git log --name-only HEAD ^origin/master \
+   | grep -v '^ ' | grep -v '^Author: ' | grep -v '^Date: ' | grep -v '^commit ' \
+   | sort | uniq
