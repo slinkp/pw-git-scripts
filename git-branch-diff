@@ -6,9 +6,9 @@ BRANCH_POINT="$1"  # TODO can this be automated? Seems like not.
 if [ -z "$BRANCH_POINT" ]; then
 	# echo Usage: `basename $0` branch-root
 	# exit 1
-    BRANCH_POINT=origin/master
+    BRANCH_POINT=origin/main
 elif [ "$BRANCH_POINT" == "--" ]; then
-    BRANCH_POINT=origin/master
+    BRANCH_POINT=origin/main
     shift
 else
     shift
