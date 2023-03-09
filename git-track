@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Sets upstream tracking of current branch
+
+BRANCH=`git rev-parse --abbrev-ref HEAD`
+if [ "$?" -gt 0 -o -z "$BRANCH" ]; then
+    exit 1
+fi
+
+git branch --set-upstream-to=origin/$BRANCH $BRANCH
