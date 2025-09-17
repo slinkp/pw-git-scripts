@@ -78,9 +78,15 @@ def run_git(args: List[str], check: bool = True) -> str:
 
     On non-zero exit and check=True, prints git stderr and exits(1).
     """
-    proc = subprocess.run(["git"] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    proc = subprocess.run(
+        ["git"] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    )
     if check and proc.returncode != 0:
-        msg = proc.stderr.strip() or proc.stdout.strip() or f"git {' '.join(args)} failed with code {proc.returncode}"
+        msg = (
+            proc.stderr.strip()
+            or proc.stdout.strip()
+            or f"git {' '.join(args)} failed with code {proc.returncode}"
+        )
         print(msg, file=sys.stderr)
         sys.exit(1)
     return proc.stdout.strip()
@@ -103,7 +109,12 @@ def head_sha() -> str:
 
 def symbolic_head() -> Optional[str]:
     """Return the short symbolic head name (branch) or None if detached."""
-    proc = subprocess.run(["git", "symbolic-ref", "-q", "--short", "HEAD"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+    proc = subprocess.run(
+        ["git", "symbolic-ref", "-q", "--short", "HEAD"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
     if proc.returncode != 0:
         return None
     return proc.stdout.strip()
@@ -112,9 +123,21 @@ def symbolic_head() -> Optional[str]:
 def is_worktree_clean() -> bool:
     """Return True if working tree has no modifications (like git bisect)."""
     # Refresh index
-    subprocess.run(["git", "update-index", "-q", "--refresh"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    rc1 = subprocess.run(["git", "diff-files", "--quiet", "--ignore-submodules", "--"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
-    rc2 = subprocess.run(["git", "diff-index", "--cached", "--quiet", "HEAD", "--"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
+    subprocess.run(
+        ["git", "update-index", "-q", "--refresh"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    rc1 = subprocess.run(
+        ["git", "diff-files", "--quiet", "--ignore-submodules", "--"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    ).returncode
+    rc2 = subprocess.run(
+        ["git", "diff-index", "--cached", "--quiet", "HEAD", "--"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    ).returncode
     return rc1 == 0 and rc2 == 0
 
 
@@ -155,7 +178,10 @@ class IterLock:
                 f.write(str(os.getpid()))
             self._locked = True
         except FileExistsError:
-            print(f"git-iter is already in use (lock found at {self.lock_path})", file=sys.stderr)
+            print(
+                f"git-iter is already in use (lock found at {self.lock_path})",
+                file=sys.stderr,
+            )
             sys.exit(1)
         return self
 
@@ -230,11 +256,20 @@ def build_sequence(first_sha: str, last_sha: str, pathspec: List[str]) -> List[s
     # verify ancestry along general ancestry (merge-base)
     proc = subprocess.run(["git", "merge-base", "--is-ancestor", first_sha, last_sha])
     if proc.returncode != 0:
-        print(f"{first_sha[:12]} is not an ancestor of {last_sha[:12]} (first-parent path required)", file=sys.stderr)
+        print(
+            f"{first_sha[:12]} is not an ancestor of {last_sha[:12]} (first-parent path required)",
+            file=sys.stderr,
+        )
         sys.exit(1)
     if first_sha == last_sha:
         return [first_sha]
-    cmd = ["rev-list", "--reverse", "--first-parent", "--ancestry-path", f"{first_sha}..{last_sha}"]
+    cmd = [
+        "rev-list",
+        "--reverse",
+        "--first-parent",
+        "--ancestry-path",
+        f"{first_sha}..{last_sha}",
+    ]
     if pathspec:
         cmd += ["--"] + pathspec
     out = run_git(cmd)
@@ -276,7 +311,10 @@ def cmd_start(args):
     first = revs_part[0]
     last = revs_part[1] if len(revs_part) >= 2 else "HEAD"
     if not is_worktree_clean():
-        print("Working tree has uncommitted changes; please commit or stash before starting.", file=sys.stderr)
+        print(
+            "Working tree has uncommitted changes; please commit or stash before starting.",
+            file=sys.stderr,
+        )
         sys.exit(1)
     first_sha = resolve_rev(first)
     last_sha = resolve_rev(last)
@@ -293,13 +331,18 @@ def cmd_start(args):
         "index": -1,
     }
     save_state(state)
-    print(f"Sequence prepared: {len(seq)} commits from {short_commit(first_sha)} to {short_commit(seq[-1])}.")
+    print(
+        f"Sequence prepared: {len(seq)} commits from {short_commit(first_sha)} to {short_commit(seq[-1])}."
+    )
 
 
 def ensure_state_exists_or_die():
     state = load_state()
     if not state or not state.get("first") or not state.get("last"):
-        print("No iter state; run 'git iter start <first> [<last>] [--] [<pathspec>...]' first.", file=sys.stderr)
+        print(
+            "No iter state; run 'git iter start <first> [<last>] [--] [<pathspec>...]' first.",
+            file=sys.stderr,
+        )
         sys.exit(1)
     return state
 
@@ -339,7 +382,10 @@ def cmd_last(args):
 def cmd_next(args):
     state = ensure_state_exists_or_die()
     if not is_worktree_clean():
-        print("Working tree has uncommitted changes; please commit or stash before proceeding.", file=sys.stderr)
+        print(
+            "Working tree has uncommitted changes; please commit or stash before proceeding.",
+            file=sys.stderr,
+        )
         sys.exit(1)
     if not state.get("sequence"):
         seq = build_sequence(state["first"], state["last"], state.get("pathspec", []))
@@ -364,7 +410,10 @@ def cmd_next(args):
 def cmd_prev(args):
     state = load_state()
     if not is_worktree_clean():
-        print("Working tree has uncommitted changes; please commit or stash before proceeding.", file=sys.stderr)
+        print(
+            "Working tree has uncommitted changes; please commit or stash before proceeding.",
+            file=sys.stderr,
+        )
         sys.exit(1)
     if not state:
         # infer sequence from root -> HEAD along first-parent
@@ -459,10 +508,16 @@ def cmd_reset(args):
 def cmd_run(args):
     state = load_state()
     if not state or not state.get("first"):
-        print("No iter state; set 'first' (or run 'git iter start') before run.", file=sys.stderr)
+        print(
+            "No iter state; set 'first' (or run 'git iter start') before run.",
+            file=sys.stderr,
+        )
         sys.exit(1)
     if not is_worktree_clean():
-        print("Working tree has uncommitted changes; please commit or stash before running.", file=sys.stderr)
+        print(
+            "Working tree has uncommitted changes; please commit or stash before running.",
+            file=sys.stderr,
+        )
         sys.exit(1)
     if not state.get("sequence"):
         seq = build_sequence(state["first"], state["last"], state.get("pathspec", []))
@@ -493,7 +548,10 @@ def cmd_run(args):
         # If they passed a single string, it will be a single token in cmd; respect that.
         proc = subprocess.run(cmd)
         if proc.returncode != 0:
-            print(f"Command exited {proc.returncode} at {short_commit(sha)} — {commit_subject(sha)}", file=sys.stderr)
+            print(
+                f"Command exited {proc.returncode} at {short_commit(sha)} — {commit_subject(sha)}",
+                file=sys.stderr,
+            )
             sys.exit(proc.returncode)
     print(f"Completed run across {len(seq)} commits.")
     sys.exit(0)
@@ -509,13 +567,17 @@ def parse_args(argv: List[str]):
 
     # start
     sp_start = subparsers.add_parser("start", add_help=False)
-    sp_start.add_argument("revs", nargs=argparse.REMAINDER, help="first [last] [-- pathspec...]")
+    sp_start.add_argument(
+        "revs", nargs=argparse.REMAINDER, help="first [last] [-- pathspec...]"
+    )
     sp_start.set_defaults(func=cmd_start)
 
     # first
     sp_first = subparsers.add_parser("first", add_help=False)
     sp_first.add_argument("rev", nargs=1)
-    sp_first.set_defaults(func=lambda args: cmd_first(arg_obj_from_namespace(args, "rev")))
+    sp_first.set_defaults(
+        func=lambda args: cmd_first(arg_obj_from_namespace(args, "rev"))
+    )
 
     # last
     sp_last = subparsers.add_parser("last", add_help=False)
@@ -533,7 +595,9 @@ def parse_args(argv: List[str]):
     # reset
     sp_reset = subparsers.add_parser("reset", add_help=False)
     sp_reset.add_argument("rev", nargs="?", default=None)
-    sp_reset.set_defaults(func=lambda args: cmd_reset(arg_obj_from_namespace(args, "rev")))
+    sp_reset.set_defaults(
+        func=lambda args: cmd_reset(arg_obj_from_namespace(args, "rev"))
+    )
 
     # run
     sp_run = subparsers.add_parser("run", add_help=False)
@@ -552,8 +616,10 @@ def parse_args(argv: List[str]):
 # Helpers to coerce argparse namespace shapes used above
 def arg_obj_from_namespace(ns: argparse.Namespace, key: str):
     """Return a simple object with attribute key (unpack single-element lists)."""
+
     class _A:
         pass
+
     a = _A()
     val = getattr(ns, key)
     # if it's a list of one, simplify
