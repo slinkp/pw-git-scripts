@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 from typing import List, Optional
 
-HELP_TEXT = """Like `git bisect`, but iterates linearly instead of bisecting.
+INTRO_TEXT = """Like `git bisect`, but iterates linearly instead of bisecting.
 
 This can be especially useful for `git iter run` when the commit history
 is dirty (a mix of bad and good commits) and you want to find the first bad
@@ -30,42 +30,6 @@ Also useful if you just want to walk through the history for whatever reason,
 without having to look at revision numbers to check out.
 
 This is simpler than `git bisect` and does not support all of the same features/options.
-
-git iter help
-\tprint this long help message.
-git iter start <first> [<last>...]] [--] [<pathspec>...]
-\treset iter state and start iteration.
-    By default, <last> is the currently checked out commit.
-git iter first <rev>
-    Mark <rev> as the oldest commit to consider.
-git iter last <rev>
-    Mark <rev> as the newest commit to consider.
-git iter next
-\tcheck out the next commit in the sequence. <first> must be set.
-    The first time this is called, it checks out <first>.
-git iter prev
-    check out the previous commit in the sequence.
-    This can be called without setting <first>
-git iter reset [<commit>]
-\tfinish iteration search and go back to commit.
-git iter run [-r] <cmd>...
-\tuse <cmd>... to automatically iterate linearly from <first> to <last>.
-    `-r` makes it iterate from <last> to <first> in reverse order.
-    Stops the first time <cmd> exits with a nonzero status.
-
-
-FEATURES WE MAY SUPPORT LATER BUT NOT NOW:
-
-git iter replay <logfile>
-\treplay iteration log.
-git iter log
-\tshow iteration log.
-git iter skip [(<rev>|<range>)...]
-\tmark <rev>... untestable revisions.
-git iter bad <rev>
-\tmark <rev> a known-bad revision. Not sure "bad" and "good are useful here
-git iter good [<rev>...]
-\tmark <rev>... known-good revisions. Not sure "bad" and "good" are useful here
 """
 
 # State paths will be under git_dir()/iter
@@ -289,7 +253,10 @@ def print_status(sha: str, idx: int, total: int) -> None:
 
 
 def cmd_help(args):
-    print(HELP_TEXT)
+    print(INTRO_TEXT)
+    print()
+    parser = build_parser()
+    parser.print_help()
     sys.exit(0)
 
 
@@ -557,53 +524,107 @@ def cmd_run(args):
     sys.exit(0)
 
 
-def parse_args(argv: List[str]):
-    parser = argparse.ArgumentParser(prog="git iter", add_help=False)
-    subparsers = parser.add_subparsers(dest="subcmd")
+def build_parser():
+    parser = argparse.ArgumentParser(
+        prog="git iter",
+        add_help=False,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    subparsers = parser.add_subparsers(dest="subcmd", title="subcommands")
 
-    # help
-    sp_help = subparsers.add_parser("help", add_help=False)
+    sp_help = subparsers.add_parser(
+        "help", add_help=False, help="show this help message"
+    )
     sp_help.set_defaults(func=cmd_help)
 
-    # start
-    sp_start = subparsers.add_parser("start", add_help=False)
+    sp_start = subparsers.add_parser(
+        "start",
+        add_help=False,
+        help="reset iter state and start iteration",
+        description=(
+            "Reset iter state and start iteration.\n"
+            "By default, <last> is the currently checked out commit."
+        ),
+    )
     sp_start.add_argument(
         "revs", nargs=argparse.REMAINDER, help="first [last] [-- pathspec...]"
     )
     sp_start.set_defaults(func=cmd_start)
 
-    # first
-    sp_first = subparsers.add_parser("first", add_help=False)
+    sp_first = subparsers.add_parser(
+        "first",
+        add_help=False,
+        help="mark <rev> as the oldest commit to consider",
+        description="Mark <rev> as the oldest commit to consider.",
+    )
     sp_first.add_argument("rev", nargs=1)
     sp_first.set_defaults(
         func=lambda args: cmd_first(arg_obj_from_namespace(args, "rev"))
     )
 
-    # last
-    sp_last = subparsers.add_parser("last", add_help=False)
+    sp_last = subparsers.add_parser(
+        "last",
+        add_help=False,
+        help="mark <rev> as the newest commit to consider",
+        description="Mark <rev> as the newest commit to consider.",
+    )
     sp_last.add_argument("rev", nargs="?", default=None)
-    sp_last.set_defaults(func=lambda args: cmd_last(arg_obj_from_namespace(args, "rev")))
+    sp_last.set_defaults(
+        func=lambda args: cmd_last(arg_obj_from_namespace(args, "rev"))
+    )
 
-    # next
-    sp_next = subparsers.add_parser("next", add_help=False)
+    sp_next = subparsers.add_parser(
+        "next",
+        add_help=False,
+        help="check out the next commit in the sequence",
+        description=(
+            "Check out the next commit in the sequence. <first> must be set.\n"
+            "The first time this is called, it checks out <first>."
+        ),
+    )
     sp_next.set_defaults(func=cmd_next)
 
-    # prev
-    sp_prev = subparsers.add_parser("prev", add_help=False)
+    sp_prev = subparsers.add_parser(
+        "prev",
+        add_help=False,
+        help="check out the previous commit in the sequence",
+        description=(
+            "Check out the previous commit in the sequence.\n"
+            "This can be called without setting <first>."
+        ),
+    )
     sp_prev.set_defaults(func=cmd_prev)
 
-    # reset
-    sp_reset = subparsers.add_parser("reset", add_help=False)
+    sp_reset = subparsers.add_parser(
+        "reset",
+        add_help=False,
+        help="finish iteration and go back to commit",
+        description="Finish iteration search and go back to commit.",
+    )
     sp_reset.add_argument("rev", nargs="?", default=None)
     sp_reset.set_defaults(
         func=lambda args: cmd_reset(arg_obj_from_namespace(args, "rev"))
     )
 
-    # run
-    sp_run = subparsers.add_parser("run", add_help=False)
+    sp_run = subparsers.add_parser(
+        "run",
+        add_help=False,
+        help="automatically iterate and run a command",
+        description=(
+            "Use <cmd>... to automatically iterate linearly from <first> to <last>.\n"
+            "`-r` makes it iterate from <last> to <first> in reverse order.\n"
+            "Stops the first time <cmd> exits with a nonzero status."
+        ),
+    )
     sp_run.add_argument("-r", "--reverse", action="store_true")
     sp_run.add_argument("cmd", nargs=argparse.REMAINDER)
     sp_run.set_defaults(func=cmd_run)
+
+    return parser
+
+
+def parse_args(argv: List[str]):
+    parser = build_parser()
 
     # fallback help when no subcommand given
     if len(argv) == 0:
