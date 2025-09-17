@@ -1,0 +1,6 @@
+[tool.black]
+line-length = 90
+
+[tool.flake8]
+extend-ignore = "E501"
+exclude = [".direnv"]
