@@ -1,0 +1,46 @@
+Like `git bisect`, but iterates linearly instead of bisecting.
+
+This can be especially useful for `git iter run` when the commit history
+is dirty (a mix of bad and good commits) and you want to find the first bad
+commit; dirty history means `git bisect` may not find the earliest bad commit.
+
+Also useful if you just want to walk through the history for whatever reason,
+without having to look at revision numbers to check out.
+
+This is simpler than `git bisect` and does not support all of the same features/options.
+
+git iter help
+	print this long help message.
+git iter start <first> [<last>...]] [--] [<pathspec>...]
+	reset iter state and start iteration.
+    By default, <last> is the currently checked out commit.
+git iter first <rev>
+    Mark <rev> as the oldest commit to consider.
+git iter last <rev>
+    Mark <rev> as the newest commit to consider.
+git iter next
+	check out the next commit in the sequence. <first> must be set.
+    The first time this is called, it checks out <first>.
+git iter prev
+    check out the previous commit in the sequence.
+    This can be called without setting <first>
+git iter reset [<commit>]
+	finish iteration search and go back to commit.
+git iter run [-r] <cmd>...
+	use <cmd>... to automatically iterate linearly from <first> to <last>.
+    `-r` makes it iterate from <last> to <first> in reverse order.
+    Stops the first time <cmd> exits with a nonzero status.
+
+
+FEATURES WE MAY SUPPORT LATER BUT NOT NOW:
+
+git iter replay <logfile>
+	replay iteration log.
+git iter log
+	show iteration log.
+git iter skip [(<rev>|<range>)...]
+	mark <rev>... untestable revisions.
+git iter bad <rev>
+	mark <rev> a known-bad revision. Not sure "bad" and "good are useful here
+git iter good [<rev>...]
+	mark <rev>... known-good revisions. Not sure "bad" and "good" are useful here
