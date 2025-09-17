@@ -253,8 +253,6 @@ def print_status(sha: str, idx: int, total: int) -> None:
 
 
 def cmd_help(args):
-    print(INTRO_TEXT)
-    print()
     parser = build_parser()
     parser.print_help()
     sys.exit(0)
@@ -527,19 +525,16 @@ def cmd_run(args):
 def build_parser():
     parser = argparse.ArgumentParser(
         prog="git iter",
-        add_help=False,
+        description=INTRO_TEXT,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     subparsers = parser.add_subparsers(dest="subcmd", title="subcommands")
 
-    sp_help = subparsers.add_parser(
-        "help", add_help=False, help="show this help message"
-    )
+    sp_help = subparsers.add_parser("help", help="show this help message")
     sp_help.set_defaults(func=cmd_help)
 
     sp_start = subparsers.add_parser(
         "start",
-        add_help=False,
         help="reset iter state and start iteration",
         description=(
             "Reset iter state and start iteration.\n"
@@ -553,7 +548,6 @@ def build_parser():
 
     sp_first = subparsers.add_parser(
         "first",
-        add_help=False,
         help="mark <rev> as the oldest commit to consider",
         description="Mark <rev> as the oldest commit to consider.",
     )
@@ -564,7 +558,6 @@ def build_parser():
 
     sp_last = subparsers.add_parser(
         "last",
-        add_help=False,
         help="mark <rev> as the newest commit to consider",
         description="Mark <rev> as the newest commit to consider.",
     )
@@ -575,7 +568,6 @@ def build_parser():
 
     sp_next = subparsers.add_parser(
         "next",
-        add_help=False,
         help="check out the next commit in the sequence",
         description=(
             "Check out the next commit in the sequence. <first> must be set.\n"
@@ -586,7 +578,6 @@ def build_parser():
 
     sp_prev = subparsers.add_parser(
         "prev",
-        add_help=False,
         help="check out the previous commit in the sequence",
         description=(
             "Check out the previous commit in the sequence.\n"
@@ -597,7 +588,6 @@ def build_parser():
 
     sp_reset = subparsers.add_parser(
         "reset",
-        add_help=False,
         help="finish iteration and go back to commit",
         description="Finish iteration search and go back to commit.",
     )
@@ -608,7 +598,6 @@ def build_parser():
 
     sp_run = subparsers.add_parser(
         "run",
-        add_help=False,
         help="automatically iterate and run a command",
         description=(
             "Use <cmd>... to automatically iterate linearly from <first> to <last>.\n"
