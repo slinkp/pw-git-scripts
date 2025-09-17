@@ -249,6 +249,20 @@ def print_status(sha: str, idx: int, total: int) -> None:
     print(f"Checked out {short_commit(sha)} — {commit_subject(sha)} ({idx+1}/{total})")
 
 
+def maybe_warn_last_moved(state: dict) -> None:
+    cur_head = head_sha()
+    last = state.get("last")
+    if not last:
+        return
+    if cur_head != last and state.get("_warned_head") != cur_head:
+        print(
+            f"Warning: HEAD has moved since 'start'; using saved <last> {short_commit(last)} (current HEAD is {short_commit(cur_head)}).",
+            file=sys.stderr,
+        )
+        state["_warned_head"] = cur_head  # remember we warned for this HEAD
+        save_state(state)
+
+
 # Command handlers
 
 
@@ -346,6 +360,7 @@ def cmd_last(args):
 
 def cmd_next(args):
     state = ensure_state_exists_or_die()
+    maybe_warn_last_moved(state)
     if not is_worktree_clean():
         print(
             "Working tree has uncommitted changes; please commit or stash before proceeding.",
@@ -380,6 +395,8 @@ def cmd_prev(args):
             file=sys.stderr,
         )
         sys.exit(1)
+    if state:
+        maybe_warn_last_moved(state)
     if not state:
         # infer sequence from root -> HEAD along first-parent
         out = run_git(["rev-list", "--reverse", "--first-parent", "HEAD"])
@@ -484,6 +501,7 @@ def cmd_run(args):
             file=sys.stderr,
         )
         sys.exit(1)
+    maybe_warn_last_moved(state)
     if not state.get("sequence"):
         seq = build_sequence(state["first"], state["last"], state.get("pathspec", []))
         state["sequence"] = seq
