@@ -268,6 +268,22 @@ def maybe_warn_last_moved(state: dict) -> None:
 
 def cmd_help(args):
     parser = build_parser()
+    topic = getattr(args, "topic", None) if args else None
+    if topic:
+        # find the subparser for the topic
+        sp = None
+        for action in parser._actions:
+            if isinstance(action, argparse._SubParsersAction):
+                sp = action.choices.get(topic)
+                choices = sorted(action.choices.keys())
+                break
+        if sp is None:
+            print(f"Unknown topic '{topic}'. Available topics: {', '.join(choices)}", file=sys.stderr)
+            sys.exit(1)
+        print(INTRO_TEXT)
+        print()
+        sp.print_help()
+        sys.exit(0)
     parser.print_help()
     sys.exit(0)
 
@@ -549,6 +565,7 @@ def build_parser():
     subparsers = parser.add_subparsers(dest="subcmd", title="subcommands")
 
     sp_help = subparsers.add_parser("help", help="show this help message")
+    sp_help.add_argument("topic", nargs="?", help="subcommand to show help for")
     sp_help.set_defaults(func=cmd_help)
 
     sp_start = subparsers.add_parser(
