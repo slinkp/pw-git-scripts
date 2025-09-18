@@ -542,6 +542,7 @@ def cmd_run(args):
         checkout_detached(sha)
         state["index"] = idx
         save_state(state)
+        print_status(sha, idx, len(seq))
         # Execute command
         # Use shell=False to avoid surprises; but preserve user's tokenization
         # If they passed a single string, it will be a single token in cmd; respect that.
