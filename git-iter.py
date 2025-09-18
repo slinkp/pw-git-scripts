@@ -376,7 +376,6 @@ def cmd_last(args):
 
 def cmd_next(args):
     state = ensure_state_exists_or_die()
-    maybe_warn_last_moved(state)
     if not is_worktree_clean():
         print(
             "Working tree has uncommitted changes; please commit or stash before proceeding.",
@@ -411,8 +410,6 @@ def cmd_prev(args):
             file=sys.stderr,
         )
         sys.exit(1)
-    if state:
-        maybe_warn_last_moved(state)
     if not state:
         # infer sequence from root -> HEAD along first-parent
         out = run_git(["rev-list", "--reverse", "--first-parent", "HEAD"])
@@ -517,7 +514,6 @@ def cmd_run(args):
             file=sys.stderr,
         )
         sys.exit(1)
-    maybe_warn_last_moved(state)
     if not state.get("sequence"):
         seq = build_sequence(state["first"], state["last"], state.get("pathspec", []))
         state["sequence"] = seq
