@@ -278,7 +278,10 @@ def cmd_help(args):
                 choices = sorted(action.choices.keys())
                 break
         if sp is None:
-            print(f"Unknown topic '{topic}'. Available topics: {', '.join(choices)}", file=sys.stderr)
+            print(
+                f"Unknown topic '{topic}'. Available topics: {', '.join(choices)}",
+                file=sys.stderr,
+            )
             sys.exit(1)
         print(INTRO_TEXT)
         print()
@@ -594,9 +597,7 @@ def build_parser():
         description="Mark <rev> as the newest commit to consider.",
     )
     sp_last.add_argument("rev", nargs="?", default=None)
-    sp_last.set_defaults(
-        func=lambda args: cmd_last(arg_obj_from_namespace(args, "rev"))
-    )
+    sp_last.set_defaults(func=lambda args: cmd_last(arg_obj_from_namespace(args, "rev")))
 
     sp_next = subparsers.add_parser(
         "next",
