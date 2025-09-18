@@ -122,3 +122,18 @@ Intended as an alternative to `git stash`. I haven't used it much though.
 You do `git stash-branch name-of-new-branch -a`, enter a commit message when
 prompted, and then you're back on your original branch with all previously
 uncommitted changes saved on `name-of-new-branch`.
+
+## git iter
+
+Like `git bisect`, but iterates linearly instead of bisecting.
+
+Basic usage:
+- git iter help [subcmd]
+- git iter start <first> [<last>] [--] [<pathspec>...]
+- git iter next | git iter prev
+- git iter run [-r] -- <cmd> [args...]
+- git iter reset
+
+Notes:
+- Requires a clean working tree; HEAD will be detached while iterating.
+- State is stored under `.git/iter`.
