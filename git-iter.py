@@ -10,13 +10,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import shlex
-import shutil
-import signal
 import subprocess
 import sys
-import tempfile
-import time
 from pathlib import Path
 from typing import List, Optional
 
@@ -299,7 +294,7 @@ def cmd_start(args):
     if "--" in revs:
         i = revs.index("--")
         revs_part = revs[:i]
-        pathspec = revs[i + 1 :]
+        pathspec = revs[i + 1:]
     else:
         revs_part = revs
 
