@@ -2,5 +2,5 @@
 line-length = 90
 
 [tool.flake8]
-extend-ignore = "E501"
+extend-ignore = ["E501", "E203"]
 exclude = [".direnv"]

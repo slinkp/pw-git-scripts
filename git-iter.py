@@ -294,7 +294,7 @@ def cmd_start(args):
     if "--" in revs:
         i = revs.index("--")
         revs_part = revs[:i]
-        pathspec = revs[i + 1:]
+        pathspec = revs[i + 1 :]
     else:
         revs_part = revs
 
