@@ -125,7 +125,12 @@ uncommitted changes saved on `name-of-new-branch`.
 
 ## git iter
 
-Like `git bisect`, but iterates linearly instead of bisecting.
+Like `git bisect`, but iterates linearly through history instead of bisecting.
+
+Motivation: Finding breakage in a messy history that mixes bad and good commits.
+`git bisect` can be fooled by this.
+Also handy for:
+ - manually exploring history via `git iter next` and `git iter prev`
 
 Basic usage:
 - git iter help [subcmd]
